@@ -27,9 +27,6 @@ settings, in bitmap fonts, one-pixel frames, dithering and a grey palette with o
 every pixel itself, in Rust with no toolkit, and the binary links nothing but glibc: no libwayland,
 no libxkbcommon, no fontconfig.
 
-It is the successor of [Tessera](https://github.com/cublae/Tessera): the same modules and the same
-config format, with Quickshell and Material swapped for pixels.
-
 ## Features
 
 - **No toolkit.** Wayland through [smithay-client-toolkit](https://github.com/Smithay/client-toolkit),
@@ -184,8 +181,7 @@ Esc leaves.
 
 ## Configuration
 
-`~/.config/smalta/config.json`. Without it, Smalta reads Tessera's config; keys it does not know
-are skipped.
+`~/.config/smalta/config.json`. Unknown keys are skipped.
 
 Nearly everything is in the settings window (the gear in the control center, or
 `smalta toggle settings`): the theme, the bar and its shape, modules dragged between sections, the
@@ -212,7 +208,7 @@ restarts by itself. A config edited by hand applies with `smalta reload`.
 | `theme.pixel` | `1` | Screen pixels per shell pixel: `2` doubles everything and stays sharp. Fractions such as `1.5` work too, still without blur, with pixels alternating one screen pixel wider and narrower |
 | `theme.tintIcons` | `false` | App and tray icons in the theme's tones, from the background to the accent |
 | `wallpaper.enabled` | `false` | Draw its own wallpaper (over another program's) |
-| `wallpaper.path` | Tessera's `theme.wallpaper` | The picture: PNG, JPEG or BMP |
+| `wallpaper.path` | `theme.wallpaper` | The picture: PNG, JPEG or BMP |
 | `wallpaper.pixelate` | `true` | Big pixels and few shades; `false` draws the picture as it is, at the screen's resolution (tint and dimming stay) |
 | `wallpaper.cell` | `3` | Screen pixels per wallpaper cell |
 | `wallpaper.levels` | `6` | Shades per channel (or of grey when tinted) |
@@ -256,7 +252,7 @@ Measured in a nested niri window of about 1300×1000 with the pixel wallpaper, d
 | with the settings window open, and once it closes again | 23 MB (37 MB) → 18 MB |
 | binary on disk, fonts and emoji included | 11 MB |
 
-## Not there yet, compared to Tessera
+## Not there yet
 
 - A vertical bar (`left`, `right`) and per-monitor bar layouts (`bar.outputs`).
 - The proxy page and screen recording settings: recording uses fixed settings through the portal,

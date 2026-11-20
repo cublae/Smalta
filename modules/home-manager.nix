@@ -36,8 +36,8 @@ in
         }
       '';
       description = ''
-        Written to {file}`~/.config/smalta/config.json`. The keys are those
-        of Tessera's config; see the README for the ones Smalta reads.
+        Written to {file}`~/.config/smalta/config.json`; see the README for
+        the keys Smalta reads.
       '';
     };
 

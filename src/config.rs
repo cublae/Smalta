@@ -1,7 +1,6 @@
-//! `~/.config/smalta/config.json`, in the same shape as Tessera's.
+//! `~/.config/smalta/config.json`.
 //!
-//! Keys Smalta does not understand yet are ignored rather than rejected, so a
-//! Tessera config can be pointed at directly while the rest is being written.
+//! Keys Smalta does not understand are ignored rather than rejected.
 
 use std::path::PathBuf;
 
@@ -124,7 +123,7 @@ pub struct Theme {
     /// background, middle tones to the accent, light to the text.
     #[serde(rename = "tintIcons")]
     pub tint_icons: bool,
-    /// Tessera's wallpaper, used when `wallpaper.path` is not set.
+    /// The wallpaper used when `wallpaper.path` is not set.
     pub wallpaper: Option<String>,
 }
 
@@ -135,22 +134,22 @@ pub fn dir() -> PathBuf {
         .unwrap_or_else(|| PathBuf::from("/etc/xdg"))
 }
 
-/// Smalta's own config, or else Tessera's, or else the defaults.
+/// The config, or the defaults when there is none.
 pub fn load() -> Config {
-    let dir = dir();
-    for path in [dir.join("smalta/config.json"), dir.join("tessera/config.json")] {
-        let Ok(text) = std::fs::read_to_string(&path) else {
-            continue;
-        };
-        match serde_json::from_str(&text) {
-            Ok(config) => {
-                log::info!("config from {}", path.display());
-                return config;
-            }
-            Err(error) => log::error!("{}: {error}; using the defaults", path.display()),
+    let path = dir().join("smalta/config.json");
+    let Ok(text) = std::fs::read_to_string(&path) else {
+        return Config::default();
+    };
+    match serde_json::from_str(&text) {
+        Ok(config) => {
+            log::info!("config from {}", path.display());
+            config
+        }
+        Err(error) => {
+            log::error!("{}: {error}; using the defaults", path.display());
+            Config::default()
         }
     }
-    Config::default()
 }
 
 impl Default for Theme {
@@ -331,7 +330,7 @@ pub struct Screenshare {
 pub struct Wallpaper {
     /// Off, the shell draws none and whatever else does stays.
     pub enabled: bool,
-    /// An image file. Empty, Tessera's `theme.wallpaper`.
+    /// An image file. Empty, `theme.wallpaper`.
     pub path: String,
     /// In big pixels and a few shades, as the rest of the shell; off, the
     /// picture as it is, at the screen's own resolution.
@@ -372,7 +371,7 @@ impl Wallpaper {
         if self.pixelate { self.cell.clamp(1, 32) } else { 1 }
     }
 
-    /// The image to draw: this section's, or Tessera's.
+    /// The image to draw: this section's, or `theme.wallpaper`.
     pub fn file(&self, theme: &Theme) -> Option<String> {
         Some(self.path.clone()).filter(|p| !p.is_empty()).or_else(|| theme.wallpaper.clone())
     }

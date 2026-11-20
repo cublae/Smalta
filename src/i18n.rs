@@ -158,7 +158,7 @@ pub fn tr(text: &'static str) -> &'static str {
         "Pixels" => "Пиксели",
         "Preview" => "Как выглядит",
         "Shades" => "Оттенков",
-        "Tessera's, or a path" => "из Tessera или путь",
+        "theme.wallpaper, or a path" => "theme.wallpaper или путь",
         "through the accent" => "через акцент",
         "Wallpaper" => "Обои",
         "when the theme picks none" => "если в теме свой не выбран",

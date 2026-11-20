@@ -1,8 +1,8 @@
 //! Settings: the config, edited in place and put to use as it changes.
 //!
 //! The file is kept as a JSON tree and every control writes only its own key
-//! into it, so whatever else the file holds -- Tessera's keys Smalta
-//! ignores, settings with no control here -- comes through untouched, and a
+//! into it, so whatever else the file holds -- keys Smalta ignores,
+//! settings with no control here -- comes through untouched, and a
 //! key never touched is never added. What the controls show is read back
 //! through [`Config`], the same way the shell reads it, so a default shows
 //! as what it means.
@@ -209,12 +209,9 @@ impl Settings {
     }
 
     pub fn opened(&mut self) {
-        let dir = config::dir();
-        self.path = dir.join("smalta/config.json");
-        // Smalta's own file, or Tessera's the first time, or nothing.
-        let source = [self.path.clone(), dir.join("tessera/config.json")]
-            .into_iter()
-            .find_map(|p| std::fs::read_to_string(p).ok().and_then(|t| serde_json::from_str::<Value>(&t).ok()));
+        self.path = config::dir().join("smalta/config.json");
+        // The file as it is, or nothing yet.
+        let source = std::fs::read_to_string(&self.path).ok().and_then(|t| serde_json::from_str::<Value>(&t).ok());
         self.doc = source.filter(Value::is_object).unwrap_or_else(|| json!({}));
         self.managed = std::fs::read_link(&self.path).is_ok_and(|target| target.starts_with("/nix/store"));
         self.read_back();
@@ -479,7 +476,7 @@ impl Settings {
         let row = flow.row(line + 10);
         let (left, right) = halves(row);
         let fallback = self.current.theme.wallpaper.clone().unwrap_or_default();
-        let placeholder = if fallback.is_empty() { tr("path to a picture") } else { tr("Tessera's, or a path") };
+        let placeholder = if fallback.is_empty() { tr("path to a picture") } else { tr("theme.wallpaper, or a path") };
         self.text_field(ui, left, Focus::Wallpaper, placeholder, cx);
         let file = w.file(&self.current.theme).unwrap_or_default();
         let name = file.rsplit('/').next().unwrap_or("").to_owned();
