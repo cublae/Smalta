@@ -770,7 +770,10 @@ impl App {
             // The toasts' corner may have moved.
             self.surfaces.retain(|s| s.role != Role::Toasts);
             self.refresh_notifications();
-            self.draw_all();
+            // Settings can apply a config during a draw; do not re-enter its widgets.
+            for index in 0..self.surfaces.len() {
+                self.schedule(index);
+            }
         }
     }
 

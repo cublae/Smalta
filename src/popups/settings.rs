@@ -231,7 +231,8 @@ impl Settings {
 
     /// One key changed, written out, and the shell told to use it.
     fn edit(&mut self, pointer: &str, value: Value, cx: &mut Ctx) {
-        if self.managed {
+        // A redraw while dragging reports the same (possibly rounded) value again.
+        if self.managed || self.doc.pointer(pointer) == Some(&value) {
             return;
         }
         set(&mut self.doc, pointer, value);
@@ -1107,6 +1108,53 @@ fn set(doc: &mut Value, pointer: &str, value: Value) {
         } else {
             object.insert((*last).to_owned(), value);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::services::Handles;
+    use std::sync::mpsc;
+
+    #[test]
+    fn held_slider_applies_each_rounded_value_once() {
+        let path = std::env::temp_dir().join(format!("smalta-slider-{}.json", std::process::id()));
+        let mut settings = Settings { doc: json!({}), path: path.clone(), ..Default::default() };
+        let handles = Handles {
+            audio: mpsc::channel().0,
+            network: mpsc::channel().0,
+            bluetooth: mpsc::channel().0,
+            power: mpsc::channel().0,
+            media: mpsc::channel().0,
+            tray: mpsc::channel().0,
+            weather: mpsc::channel().0,
+            rates: mpsc::channel().0,
+        };
+        let mut requests = Vec::new();
+        let mut cx = Ctx {
+            services: &Default::default(),
+            handles: &handles,
+            requests: &mut requests,
+            dnd: false,
+            recording: false,
+            notifications: &Default::default(),
+            config: &Default::default(),
+            snapshot: &Default::default(),
+        };
+        for position in [0.43_f32, 0.431, 0.432, 0.433] {
+            for _ in 0..100 {
+                settings.edit("/wallpaper/dim", json!((position * 18.0).round() / 20.0), &mut cx);
+            }
+        }
+        assert!(settings.error.is_none(), "{:?}", settings.error);
+        assert_eq!(cx.requests.len(), 1);
+        assert!(matches!(cx.requests[0], Request::ApplyConfig));
+        settings.edit("/wallpaper/dim", json!(0.5), &mut cx);
+        assert_eq!(cx.requests.len(), 2);
+        let saved: Value = serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
+        assert_eq!(saved.pointer("/wallpaper/dim"), Some(&json!(0.5)));
+        std::fs::remove_file(path).unwrap();
     }
 }
 
