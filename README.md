@@ -247,13 +247,13 @@ restarts by itself. A config edited by hand applies with `smalta reload`.
 
 ## Resource usage
 
-Measured in a nested niri at 1600×900 with the pixel wallpaper, desktop widgets and a floating bar
+Measured in a nested niri window of about 1300×1000 with the pixel wallpaper, desktop widgets and a floating bar
 (PSS, shared library pages split fairly; RSS in brackets):
 
 | What | Memory |
 |---|---|
-| idle: bar, wallpaper, widgets, tray, notification server | 44 MB (52 MB) |
-| with the settings window open | 49 MB (63 MB) |
+| idle: bar, wallpaper, widgets, tray, notification server | 18 MB (27 MB) |
+| with the settings window open, and once it closes again | 23 MB (37 MB) → 18 MB |
 | binary on disk, fonts and emoji included | 11 MB |
 
 ## Not there yet, compared to Tessera

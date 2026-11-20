@@ -1663,6 +1663,7 @@ fn main() {
 
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
     let _ = popups::settings::STARTED.set(std::time::Instant::now());
+    tune_malloc();
 
     let Some(listener) = ipc::listen() else {
         eprintln!("smalta: already running");
@@ -2291,6 +2292,30 @@ delegate_registry!(App);
 smithay_client_toolkit::delegate_dispatch2!(App);
 
 /// Screen pixels to a shell pixel, as configured, within reason.
+/// glibc's allocator, set for a program that lives for days and now and then
+/// needs a screen-sized buffer for a moment: a decoded wallpaper, a frozen
+/// screen, the two pictures of a fade. Left to itself, glibc moves such a
+/// buffer onto the heap once one has been freed, and a heap does not shrink
+/// past whatever small allocation came after it: the shell would keep the
+/// largest moment it ever had. Fixed at 128 KiB, the threshold sends every
+/// large buffer to its own mapping, which goes back to the system when
+/// freed. Two arenas, not eight per core: the service threads allocate little.
+fn tune_malloc() {
+    #[cfg(target_env = "gnu")]
+    {
+        unsafe extern "C" {
+            fn mallopt(param: i32, value: i32) -> i32;
+        }
+        const M_MMAP_THRESHOLD: i32 = -3;
+        const M_ARENA_MAX: i32 = -8;
+        // SAFETY: plain settings of the allocator, made before any thread starts.
+        unsafe {
+            mallopt(M_MMAP_THRESHOLD, 128 * 1024);
+            mallopt(M_ARENA_MAX, 2);
+        }
+    }
+}
+
 fn pixel_of(config: &Config) -> f32 {
     let pixel = config.theme.pixel;
     if pixel.is_finite() { pixel.clamp(1.0, 8.0) } else { 1.0 }

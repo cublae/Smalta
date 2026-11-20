@@ -10,7 +10,7 @@
 //! share, brought to a brightness that reads on the dark theme.
 
 use std::sync::{Arc, Mutex};
-use std::time::SystemTime;
+use std::time::{Duration, Instant, SystemTime};
 
 use crate::canvas::Color;
 use crate::config::Wallpaper;
@@ -24,14 +24,24 @@ const BAYER: [[u32; 4]; 4] = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15,
 /// one pixel a cell. A larger screen keeps it larger, up to as it is.
 const KEPT: i32 = 2560;
 
-/// The picture at `path`, decoded once and kept until the file changes,
-/// shrunk to [`KEPT`] or to `longest`, whichever is more. Every setting moved
-/// would otherwise decode it again -- fifty megabytes passing through for a
-/// large JPEG, twice, for the preview and the screen.
+/// How long the picture is kept after it was last asked for. The screen
+/// keeps what was drawn from it; only a moving slider needs it again soon.
+const KEEP_FOR: Duration = Duration::from_secs(10);
+
+/// The path, its modification time, the side it was cut to, and the picture.
+type Kept = Option<(String, Option<SystemTime>, i32, Arc<Pixmap>)>;
+static KEPT_IMAGE: Mutex<Kept> = Mutex::new(None);
+/// When the picture was last asked for, and whether a thread is waiting to let it go.
+static LAST_USE: Mutex<(Option<Instant>, bool)> = Mutex::new((None, false));
+
+/// The picture at `path`, decoded once and kept until the file changes or
+/// nobody has asked for it for [`KEEP_FOR`], shrunk to [`KEPT`] or to
+/// `longest`, whichever is more. Every setting moved would otherwise decode
+/// it again -- fifty megabytes passing through for a large JPEG, twice, for
+/// the preview and the screen. Kept for good, it would hold a screen-sized
+/// picture nothing draws from.
 fn load(path: &str, longest: i32) -> Option<Arc<Pixmap>> {
-    /// The path, its modification time, the side it was cut to, and the picture.
-    type Kept = Option<(String, Option<SystemTime>, i32, Arc<Pixmap>)>;
-    static KEPT_IMAGE: Mutex<Kept> = Mutex::new(None);
+    used();
     let modified = std::fs::metadata(path).and_then(|m| m.modified()).ok();
     let limit = longest.max(KEPT);
     let mut kept = KEPT_IMAGE.lock().ok()?;
@@ -179,4 +189,26 @@ pub fn posterize(image: &mut Pixmap, levels: u32) {
             image.pixels[at] = 0xff00_0000 | (shade(r) << 16) | (shade(g) << 8) | shade(b);
         }
     }
+}
+
+/// Notes a use, and starts a thread to let the picture go once it is idle.
+fn used() {
+    let Ok(mut last) = LAST_USE.lock() else { return };
+    last.0 = Some(Instant::now());
+    if std::mem::replace(&mut last.1, true) {
+        return;
+    }
+    std::thread::spawn(|| {
+        loop {
+            std::thread::sleep(KEEP_FOR);
+            let Ok(mut last) = LAST_USE.lock() else { return };
+            if last.0.is_none_or(|t| t.elapsed() >= KEEP_FOR) {
+                if let Ok(mut kept) = KEPT_IMAGE.lock() {
+                    *kept = None;
+                }
+                last.1 = false;
+                return;
+            }
+        }
+    });
 }
