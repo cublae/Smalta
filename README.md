@@ -147,6 +147,7 @@ smalta toggle notification-center # weather, windows
 smalta toggle settings            # the settings window
 smalta toggle session             # the full-screen session menu
 smalta screenshot                 # freeze the screens, select, mark up, copy or save
+smalta pick-color                 # freeze the screens, click a pixel to copy its colour
 smalta switch                     # the window switcher; `switch back` goes the other way
 smalta reload                     # read the config again and apply it
 smalta toggle-hidden              # the focused window out of screen sharing, or back in
@@ -161,6 +162,7 @@ binds {
     Mod+Space { spawn "smalta" "toggle" "launcher"; }
     Mod+Escape { spawn "smalta" "toggle" "session"; }
     Print { spawn "smalta" "screenshot"; }
+    Mod+Shift+C { spawn "smalta" "pick-color"; }
     Alt+Tab { spawn "smalta" "switch"; }
     Alt+Shift+Tab { spawn "smalta" "switch" "back"; }
 }
@@ -172,6 +174,7 @@ And for Hyprland:
 hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("smalta toggle launcher"))
 hl.bind("SUPER + ESCAPE", hl.dsp.exec_cmd("smalta toggle session"))
 hl.bind("PRINT", hl.dsp.exec_cmd("smalta screenshot"))
+hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd("smalta pick-color"))
 hl.bind("ALT + TAB", hl.dsp.exec_cmd("smalta switch"))
 hl.bind("ALT + SHIFT + TAB", hl.dsp.exec_cmd("smalta switch back"))
 ```

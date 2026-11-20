@@ -1624,6 +1624,10 @@ impl App {
                 self.handle_requests(vec![Request::Screenshot]);
                 "taking a screenshot".into()
             }
+            ["pick-color"] => {
+                self.handle_requests(vec![Request::PickColor]);
+                "picking a colour".into()
+            }
             ["switch"] => {
                 self.switch(1);
                 "switched".into()

@@ -149,6 +149,7 @@ smalta toggle notification-center # weather, windows
 smalta toggle settings            # окно настроек
 smalta toggle session             # меню сеанса на весь экран
 smalta screenshot                 # заморозить экраны, выделить, разметить, скопировать или сохранить
+smalta pick-color                 # заморозить экраны, клик по пикселю копирует его цвет
 smalta switch                     # переключатель окон; `switch back` — в обратную сторону
 smalta reload                     # перечитать конфиг и применить
 smalta toggle-hidden              # окно в фокусе скрыть из демонстрации или вернуть
@@ -163,6 +164,7 @@ binds {
     Mod+Space { spawn "smalta" "toggle" "launcher"; }
     Mod+Escape { spawn "smalta" "toggle" "session"; }
     Print { spawn "smalta" "screenshot"; }
+    Mod+Shift+C { spawn "smalta" "pick-color"; }
     Alt+Tab { spawn "smalta" "switch"; }
     Alt+Shift+Tab { spawn "smalta" "switch" "back"; }
 }
@@ -174,6 +176,7 @@ binds {
 hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("smalta toggle launcher"))
 hl.bind("SUPER + ESCAPE", hl.dsp.exec_cmd("smalta toggle session"))
 hl.bind("PRINT", hl.dsp.exec_cmd("smalta screenshot"))
+hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd("smalta pick-color"))
 hl.bind("ALT + TAB", hl.dsp.exec_cmd("smalta switch"))
 hl.bind("ALT + SHIFT + TAB", hl.dsp.exec_cmd("smalta switch back"))
 ```

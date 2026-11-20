@@ -85,6 +85,7 @@ forwards a command to the one already running:
   smalta toggle settings
   smalta toggle session   lock, log out, suspend, restart, power off, full screen
   smalta screenshot       freeze the screens, select, mark up, copy or save
+  smalta pick-color       freeze the screens, click a pixel to copy its colour
   smalta toggle windows   the window switcher, chosen with Enter or a click
   smalta switch           the window switcher; again for the next window,
                           letting go of Alt for the chosen one
